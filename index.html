@@ -1,130 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
-
-<style>
-
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #030;
-  shape-rendering: crispEdges;
-  stroke-dasharray: "5,5"
-}
-
-.tick line {
-  fill: red;
-  stroke: #030;
-}
-
-.axis text {
-  font: 10px sans-serif;
-}
-
-.cells path {
-  fill: none;
-  pointer-events: all;
-}
-
-.cells circle {
-  stroke: black;
-  stroke-width: 1;
-  shape-rendering: auto;
-}
-
-.cells :hover circle {
-  stroke: #E94953;
-  stroke-width: 1;
-  shape-rendering: auto;
-}
-
-.d3-tip {
-  line-height: 1;
-  font-weight: bold;
-  font-size: 15px;
-  padding: 10px;
-  background: #e74c3c;
-  color: #fff;
-  border-radius: 2px;
-}
-
-/* Creates a small triangle extender for the tooltip */
-.d3-tip:after {
-  box-sizing: border-box;
-  display: inline;
-  font-size: 15px;
-  width: 100%;
-  line-height: 1;
-  color: #e74c3c;
-  content: "\25B2";
-  position: absolute;
-  text-align: center;
-}
-
-/* Style northward tooltips differently */
-.d3-tip.n:after {
-  margin: -1px 0 0 0;
-  top: 100%;
-  left: 0;
-}
-
-/* Style northward tooltips differently */
-.d3-tip.s:after {
-  margin: -7px 0 0 0;
-  top: 0%;
-  left: 0;
-}
-
-.indexline {
-  fill: none;
-  stroke: steelblue;
-  stroke-width: 1px;
-  opacity: 0.3;
-  clip-path: url(#clip);
-}
-
-.zoom {
-  cursor: move;
-  fill: none;
-  pointer-events: all;
-}
-
-
-</style>
-
-<head>
-  <title>Allra timeline</title>
-  <meta charset="UTF-8">
-  <script type="text/javascript" src="src/jquery-3.1.1.min.js"></script>
-  <link href = "src/bootstrap.3.3.7/css/bootstrap.min.css" rel="stylesheet">
-  <script type="text/javascript" src="src/bootstrap.3.3.7/js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="data/indexdata.js"></script>
-  <script type="text/javascript" src="data/eventdata.js"></script>
-</head>
-
-<body>
-
-  <div class = "plot col-md-10 col-md-offset-1">
-  <svg width="1160" height="600"></svg>
-   </div>
-    <script>
-      data = [{id:"aa", value:3},
-              {id:"bb", value:54},
-              {id:"bb", value:345},
-              {id:"bc", value:45},
-              {id:"bs", value:5},
-              {id:"br", value:43},
-              {id:"b2", value:234},
-              {id:"bg", value:144}
-            ]
-
-      linedata = [{id:"aa", offset:1, start:0, stop:33, color: '1abc9c'},
-                  {id:"bb", offset:2, start:0, stop:350, color: '2ecc71'},
-                  {id:"bb", offset:3, start:25, stop:300, color: '3498db'}
-            ]
-    </script>
-    <script type="text/javascript" src="src/d3/d3.min.js"></script>
-    <script src="src/d3-tip.js"></script>
-    <script type="text/javascript" src="dots.js"></script>
-    <script>//drawer(data, linedata)</script>
-</body>
-</html>
+  <svg width="800" height="500"></svg>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+      <script>
+      
+      var svg = d3.select("svg"),
+      margin = {top: 20, right: 20, bottom: 30, left: 50},
+      width = +svg.attr("width") - margin.left - margin.right,
+      height = +svg.attr("height") - margin.top - margin.bottom,
+      g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      
+      var parseTime = d3.timeParse("%d-%b-%y");
+      
+      var x = d3.scaleTime()
+      .rangeRound([0, width]);
+      
+      var y = d3.scaleLinear()
+      .rangeRound([height, 0]);
+      
+      var line = d3.line()
+      .x(function(d) { return x(d.date); })
+      .y(function(d) { return y(d.close); })
+        .curve(d3.curveCardinal)
+      
+data =  [
+  {"date":30, "close":1},
+  //{"date":32, "close":2},
+  //{"date":50, "close":2},
+  {"date":80, "close":15},
+  {"date":100, "close":100},
+  {"date":110, "close":120}
+  ]
+        
+        x.domain(d3.extent(data, function(d) { return d.date; }));
+        y.domain(d3.extent(data, function(d) { return d.close; }));
+        
+        g.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x).ticks(0))
+        .append("text")
+        .style("font", "30px")
+        .attr("fill", "#000")
+        //.attr("transform", "rotate(-90)")
+        .attr("x", 730)
+        .attr("y", -15)
+        .attr("dy", "0.71em")
+        .attr("text-anchor", "end")
+        .text("Antal datamängder");
+        //.select(".domain")
+        //.remove();
+        
+        g.append("g")
+        .call(d3.axisLeft(y).ticks(0))
+        .append("text")
+        .attr("fill", "#000")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", "0.71em")
+        .attr("text-anchor", "end")
+        .text("Värde");
+        
+        g.append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-linecap", "round")
+        .attr("stroke-width", 5.5)
+        .attr("d", line)
+        .attr("stroke-dasharray", function(d){ return this.getTotalLength() })
+        .attr("stroke-dashoffset", function(d){ return this.getTotalLength() })
+        .transition()
+        .ease(d3.easeExp)
+        .duration(5000)
+        .attr("stroke-dashoffset", 0);
+      
+      </script>
+        
